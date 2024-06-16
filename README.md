@@ -6,6 +6,10 @@
 make install
 ```
 
+**NOTE**: By default, this installs under `/usr/local/bin/mksitemap`.
+
+Change the `DESTDIR= /usr/local/bin` line in the `Makefile` if needed.
+
 ## TL;DR Run mksitemap
 
 ```sh
