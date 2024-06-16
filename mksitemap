@@ -288,7 +288,7 @@ function form_sitemap
     #
     if cmp -s "$TMP_SITE_MAP_FILE" "$SITE_MAP_FILE"; then
 
-	# case: tarball did not change
+	# case: sitemap did not change
 	#
 	if [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: file did not change: $SITE_MAP_FILE" 1>&2
@@ -306,7 +306,7 @@ function form_sitemap
 	    exit 14
 	fi
 
-    # case: tarball changed, update the sitemap file unless -n
+    # case: sitemap changed, update the sitemap file unless -n
     #
     elif [[ -z $NOOP ]]; then
 
@@ -603,17 +603,17 @@ fi
 #
 export TMP_SITEMAP=".tmp.$NAME.SITEMAP.$$.tmp"
 if [[ $V_FLAG -ge 3 ]]; then
-    echo  "$0: debug[3]: temporary tarball: $TMP_SITEMAP" 1>&2
+    echo  "$0: debug[3]: temporary sitemap: $TMP_SITEMAP" 1>&2
 fi
 trap 'rm -f $TMP_MANIFEST_LIST $TMP_SITEMAP; exit' 0 1 2 3 15
 rm -f "$TMP_SITEMAP"
 if [[ -e $TMP_SITEMAP ]]; then
-    echo "$0: ERROR: cannot remove temporary tarball: $TMP_SITEMAP" 1>&2
+    echo "$0: ERROR: cannot remove temporary sitemap: $TMP_SITEMAP" 1>&2
     exit 22
 fi
 :> "$TMP_SITEMAP"
 if [[ ! -e $TMP_SITEMAP ]]; then
-    echo "$0: ERROR: cannot create temporary tarball: $TMP_SITEMAP" 1>&2
+    echo "$0: ERROR: cannot create temporary sitemap: $TMP_SITEMAP" 1>&2
     exit 23
 fi
 
@@ -813,7 +813,7 @@ else
     #
     if cmp -s "$TMP_SITEMAP" "$SITEMAP"; then
 
-	# case: tarball did not change
+	# case: sitemap did not change
 	#
 	if [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: file did not change: $SITEMAP" 1>&2
@@ -831,7 +831,7 @@ else
 	    exit 41
 	fi
 
-    # case: tarball changed, update the sitemap file unless -n
+    # case: sitemap changed, update the sitemap file unless -n
     #
     elif [[ -z $NOOP ]]; then
 
