@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# mksitemap - make a sitemap for a web tree
+# mksitemap - make a sitemap for a website directory
 #
 # For sitemap xml syntax, see:
 #
