@@ -1,6 +1,16 @@
-# TL;DR Try mksitemap
+# Try mksitemap
 
-## TL;DR Install mksitemap
+Build a sitemap file for a directory of files.
+
+
+### Example
+
+```sh
+mksitemap -v 1 /var/www/html http://www.example.com
+```
+
+
+## Install mksitemap
 
 ```sh
 make install
@@ -10,7 +20,8 @@ make install
 
 Change the `DESTDIR= /usr/local/bin` line in the `Makefile` if needed.
 
-## TL;DR Run mksitemap
+
+## Run mksitemap
 
 ```sh
 mksitemap topdir site_url
@@ -19,11 +30,6 @@ mksitemap topdir site_url
 Where `topdir` is the top level directory containing your website tree,
 and `site_url` is the URL of your site including the leading _http://_ or _https://_.
 
-### Example
-
-```sh
-mksitemap -v 1 /var/www/html http://www.example.com
-```
 
 ## Command line help
 
