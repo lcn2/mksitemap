@@ -96,7 +96,7 @@ shopt -s globstar	# enable ** to match all files and zero or more directories an
 
 # set variables referenced in the usage message
 #
-export VERSION="1.1 2024-06-17"
+export VERSION="1.1.1 2024-06-17"
 NAME=$(basename "$0")
 export NAME
 export V_FLAG=0
@@ -223,13 +223,22 @@ function form_sitemap
     #
     :> "$TMP_SITE_MAP_FILE"
     if [[ ! -f $TMP_SITE_MAP_FILE || -s $TMP_SITE_MAP_FILE ]]; then
+	if [[ $V_FLAG -ge 3 ]]; then
+	    rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	else
+	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	fi
 	echo "$0: ERROR: unable to form an empty sitemap file: $TMP_SITE_MAP_FILE" 1>&2
 	exit 11
     fi
     :> "${TMP_SITE_MAP_FILE}.gz"
     if [[ ! -f ${TMP_SITE_MAP_FILE}.gz || -s $TMP_SITE_MAP_FILE ]]; then
+	if [[ $V_FLAG -ge 3 ]]; then
+	    rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	else
+	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	fi
 	echo "$0: ERROR: unable to form an empty gzipped sitemap file: ${TMP_SITE_MAP_FILE}.gz" 1>&2
-	rm -f "$TMP_SITE_MAP_FILE"
 	exit 12
     fi
 
@@ -269,8 +278,12 @@ function form_sitemap
     # verify the temporary sitemap is not empty
     #
     if [[ ! -s $TMP_SITE_MAP_FILE ]]; then
+	if [[ $V_FLAG -ge 3 ]]; then
+	    rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	else
+	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	fi
 	echo "$0: ERROR: temporary sitemap is empty: $TMP_SITE_MAP_FILE" 1>&2
-	rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	exit 13
     fi
 
@@ -287,13 +300,12 @@ function form_sitemap
 	    echo "$0: debug[5]: removing temporary sitemap: $TMP_SITE_MAP_FILE"
 	fi
 	if [[ $V_FLAG -ge 3 ]]; then
-	    rm -f -v -- "$TMP_SITE_MAP_FILE"
+	    rm -f -v -- "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	else
-	    rm -f -- "$TMP_SITE_MAP_FILE"
+	    rm -f -- "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	fi
 	if [[ -s $TMP_SITE_MAP_FILE ]]; then
 	    echo "$0: ERROR: unable remove empty sitemap file: $TMP_SITE_MAP_FILE" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 14
 	fi
 
@@ -314,15 +326,23 @@ function form_sitemap
 	    status="$?"
 	fi
 	if [[ status -ne 0 ]]; then
+	    if [[ $V_FLAG -ge 3 ]]; then
+		rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    else
+		rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    fi
 	    echo "$0: ERROR: mv -f -- $TMP_SITE_MAP_FILE $SITE_MAP_FILE filed, error code: $status" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 15
 	elif [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: replaced sitemap file: $SITE_MAP_FILE" 1>&2
 	fi
 	if [[ ! -s $SITE_MAP_FILE ]]; then
+	    if [[ $V_FLAG -ge 3 ]]; then
+		rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    else
+		rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    fi
 	    echo "$0: ERROR: sitemap file is empty: $SITE_MAP_FILE" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 16
 	fi
 
@@ -331,8 +351,12 @@ function form_sitemap
 	gzip -f -q --best < "$SITE_MAP_FILE" > "${TMP_SITE_MAP_FILE}.gz"
 	status="$?"
 	if [[ $status -ne 0 ]]; then
+	    if [[ $V_FLAG -ge 3 ]]; then
+		rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    else
+		rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    fi
 	    echo "$0: ERROR: gzip -f -q --best < $SITE_MAP_FILE > ${TMP_SITE_MAP_FILE}.gz failed, error: $status" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 17
 	fi
 	if [[ $V_FLAG -ge 3 ]]; then
@@ -343,8 +367,12 @@ function form_sitemap
 	    status="$?"
 	fi
 	if [[ $status -ne 0 ]]; then
+	    if [[ $V_FLAG -ge 3 ]]; then
+		rm -f -v "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    else
+		rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
+	    fi
 	    echo "$0: ERROR: mv -f -- ${TMP_SITE_MAP_FILE}.gz ${SITE_MAP_FILE}.gz  failed, error: $status" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 18
 	elif [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: replaced gzipped sitemap file: ${SITE_MAP_FILE}.gz" 1>&2
@@ -357,13 +385,12 @@ function form_sitemap
 	    echo "$0: debug[3]: because of -n, sitemap was not modified: $SITE_MAP_FILE" 1>&2
 	fi
 	if [[ $V_FLAG -ge 3 ]]; then
-	    rm -f -v -- "$TMP_SITE_MAP_FILE"
+	    rm -f -v -- "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	else
-	    rm -f -- "$TMP_SITE_MAP_FILE"
+	    rm -f -- "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	fi
 	if [[ -s $TMP_SITE_MAP_FILE ]]; then
 	    echo "$0: ERROR: unable remove empty sitemap file: $TMP_SITE_MAP_FILE" 1>&2
-	    rm -f "$TMP_SITE_MAP_FILE" "${TMP_SITE_MAP_FILE}.gz"
 	    exit 19
 	fi
     fi
@@ -859,5 +886,9 @@ fi
 
 # All Done!!! -- Jessica Noll, Age 2
 #
-rm -f "$TMP_MANIFEST_LIST" "$TMP_SITEMAP" "${TMP_SITEMAP}.gz"
+if [[ $V_FLAG -ge 3 ]]; then
+    rm -f -v "$TMP_MANIFEST_LIST" "$TMP_SITEMAP" "${TMP_SITEMAP}.gz"
+else
+    rm -f "$TMP_MANIFEST_LIST" "$TMP_SITEMAP" "${TMP_SITEMAP}.gz"
+fi
 exit 0
