@@ -96,22 +96,10 @@ shopt -s globstar	# enable ** to match all files and zero or more directories an
 
 # set variables referenced in the usage message
 #
-export VERSION="1.0 2024-06-16"
+export VERSION="1.1 2024-06-17"
 NAME=$(basename "$0")
 export NAME
 export V_FLAG=0
-GIT_TOOL=$(type -P git)
-export GIT_TOOL
-if [[ -z "$GIT_TOOL" ]]; then
-    echo "$0: FATAL: git tool is not installed or not in \$PATH" 1>&2
-    exit 5
-fi
-"$GIT_TOOL" rev-parse --is-inside-work-tree >/dev/null 2>&1
-status="$?"
-if [[ $status -eq 0 ]]; then
-    TOPDIR=$("$GIT_TOOL" rev-parse --show-toplevel)
-fi
-export TOPDIR
 export MODTIME_METHOD=""
 # While the sitemap spec says that a sitemap can hold up to 50000 files,
 # we set a limit of %70 of that value for added room and to make sitemaps smaller.
@@ -156,7 +144,7 @@ function output_modtime
 	if [[ $status -ne 0 ]]; then
 	    echo "$0: ERROR: in output_modtime:" \
 		 "TZ=UTC stat -f '%Sm' -t '%FT%T+00:00' $FILENAME failed, error code: $status" 1>&2
-	    exit 8
+	    exit 7
 	fi
 	;;
 
@@ -169,7 +157,7 @@ function output_modtime
 	if [[ $status0 -ne 0 || $status1 -ne 0 ]]; then
 	    echo "$0: ERROR: in output_modtime:" \
 		 "TZ=UTC stat -c '%y' $FILENAME | sed .. failed, error codes: $status0 and $status1" 1>&2
-	    exit 8
+	    exit 7
 	fi
 	;;
 
@@ -185,12 +173,12 @@ function output_modtime
 	if [[ $status0 -ne 0 || $status1 -ne 0 ]]; then
 	    echo "$0: ERROR: in output_modtime:" \
 		 "TZ=UTZ ls -D '%FT%T+00:00' -ld $FILENAME | awk .. failed, error codes: $status0 and $status1" 1>&2
-	    exit 8
+	    exit 7
 	fi
 	;;
 
     *) echo "0: in output_modtime: unknown MODTIME_METHOD value: $MODTIME_METHOD" 1>&2
-	exit 8
+	exit 7
 	;;
     esac
     return 0
@@ -398,8 +386,7 @@ Exit codes:
      4         bash version is too old
      5	       some internal tool is not found or not an executable file
      6	       unable to cd or topdir is not a directory
-     7	       file under topdir is not a readable file
-     8	       unable to determine a method to find the modification time of a file in W3C Datefile format
+     7	       unable to determine a method to find the modification time of a file in W3C Datefile format
  >= 10         internal error
 
 $NAME version: $VERSION"
@@ -550,7 +537,7 @@ else
 
 	else
 	    echo "$0: ERROR: we cannot determine how to form a file modification time in W3C Datetime formt" 1>&2
-	    exit 8
+	    exit 7
 	fi
     fi
 fi
@@ -561,13 +548,12 @@ if [[ $V_FLAG -ge 3 ]]; then
     echo "$0: debug[3]: VERSION=$VERSION" 1>&2
     echo "$0: debug[3]: NAME=$NAME" 1>&2
     echo "$0: debug[3]: V_FLAG=$V_FLAG" 1>&2
-    echo "$0: debug[3]: GIT_TOOL=$GIT_TOOL" 1>&2
-    echo "$0: debug[3]: TOPDIR=$TOPDIR" 1>&2
-    echo "$0: debug[3]: SITE_URL=$SITE_URL" 1>&2
     echo "$0: debug[3]: MODTIME_METHOD=$MODTIME_METHOD" 1>&2
     echo "$0: debug[3]: MAX_FILE_COUNT=$MAX_FILE_COUNT" 1>&2
     echo "$0: debug[3]: NOOP=$NOOP" 1>&2
     echo "$0: debug[3]: DO_NOT_PROCESS=$DO_NOT_PROCESS" 1>&2
+    echo "$0: debug[3]: TOPDIR=$TOPDIR" 1>&2
+    echo "$0: debug[3]: SITE_URL=$SITE_URL" 1>&2
     echo "$0: debug[3]: CD_FAILED=$CD_FAILED" 1>&2
     echo "$0: debug[3]: SITEMAP=$SITEMAP" 1>&2
 fi
@@ -605,7 +591,7 @@ export TMP_SITEMAP=".tmp.$NAME.SITEMAP.$$.tmp"
 if [[ $V_FLAG -ge 3 ]]; then
     echo  "$0: debug[3]: temporary sitemap: $TMP_SITEMAP" 1>&2
 fi
-trap 'rm -f $TMP_MANIFEST_LIST $TMP_SITEMAP; exit' 0 1 2 3 15
+trap 'rm -f $TMP_MANIFEST_LIST $TMP_SITEMAP $TMP_SITEMAP.gz; exit' 0 1 2 3 15
 rm -f "$TMP_SITEMAP"
 if [[ -e $TMP_SITEMAP ]]; then
     echo "$0: ERROR: cannot remove temporary sitemap: $TMP_SITEMAP" 1>&2
@@ -623,26 +609,24 @@ if [[ $V_FLAG -ge 3 ]]; then
     echo  "$0: debug[3]: generating temporary manifest list: $TMP_MANIFEST_LIST" 1>&2
 fi
 find . \( \
-	  -name '.*' \
+	  -name '.?*' -o \
 	  -name ads.txt -o \
+	  -name CVS -o \
 	  -name .DS_Store -o \
-	  -name for-you-only -o \
 	  -name .github -o \
 	  -name .gitignore -o \
 	  -name .git -o \
 	  -name 'google[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].html' -o \
 	  -name .htaccess -o \
-	  -name NOTES -o \
 	  -name private -o \
 	  -name RCS -o \
+	  -name robots.txt -o \
+	  -name 'site.map.part.*' -o \
 	  -name sitemap.xml.gz -o \
 	  -name sitemap.xml -o \
 	  -name '.tmp.*' -o \
-	  -name TO-BE-USED -o \
-	  -name UNUSED -o \
-	  -name '*,v' -o \
-	  -name wsrc \
-       \) -prune -o -type f -printf '%P\n' > "$TMP_MANIFEST_LIST"
+	  ! -perm -ugo=r \
+       \) -prune -o -type f -perm -ugo=r -printf '%P\n' > "$TMP_MANIFEST_LIST"
 status="$?"
 if [[ $status -ne 0 ]]; then
     echo "$0: ERROR: find . ... failed, error: $status" 1>&2
@@ -668,40 +652,6 @@ if [[ ! -s $TMP_MANIFEST_LIST ]]; then
     echo "$0: ERROR: sorted temporary manifest list is not a non-empty file: $TMP_MANIFEST_LIST" 1>&2
     exit 27
 fi
-
-# verify that the manifest list contains only readable files
-#
-if [[ $V_FLAG -ge 3 ]]; then
-    echo  "$0: debug[3]: verifying temporary manifest list are all readable: $TMP_MANIFEST_LIST" 1>&2
-fi
-for FILE in $(< "$TMP_MANIFEST_LIST"); do
-
-    if [[ ! -e $FILE ]]; then
-	if [[ -z $CAP_W_FLAG_FOUND ]]; then
-	    echo "$0: ERROR: file does not exist: $FILE" 1>&2
-	else
-	    echo "$0: Warning: file does not exist: $FILE" 1>&2
-	fi
-	exit 7
-    fi
-    if [[ ! -f $FILE ]]; then
-	if [[ -z $CAP_W_FLAG_FOUND ]]; then
-	    echo "$0: ERROR: is not a file: $FILE" 1>&2
-	else
-	    echo "$0: Warning: is not a file: $FILE" 1>&2
-	fi
-	exit 7
-    fi
-    if [[ ! -r $FILE ]]; then
-	if [[ -z $CAP_W_FLAG_FOUND ]]; then
-	    echo "$0: ERROR: is not a readable file: $FILE" 1>&2
-	else
-	    echo "$0: Warning: is not a readable file: $FILE" 1>&2
-	fi
-	exit 7
-    fi
-
-done
 
 # count the files in the manifest list
 #
@@ -731,7 +681,7 @@ if [[ $FILE_COUNT -le $MAX_FILE_COUNT ]]; then
     status="$?"
     if [[ $status -ne 0 ]]; then
 	echo "$0: ERROR: form_sitemap $TMP_MANIFEST_LIST $TMP_SITEMAP $SITEMAP failed, error: $status" 1>&2
-	exit 38
+	exit 29
     fi
 
 # case: need to form a multi-part manifest
@@ -752,7 +702,7 @@ else
 	echo  "$0: debug[5]: about to execute: " \
 		"split -x --lines=$MAX_FILE_COUNT $TMP_MANIFEST_LIST $TMP_SITEMAP_PART_PREFIX." 1>&2
     fi
-    trap 'rm -f $TMP_MANIFEST_LIST $TMP_SITEMAP; find . -mindepth 1 -maxdepth 1 -type f -name "$TMP_SITEMAP_PART_PREFIX.*" -delete; exit' 0 1 2 3 15
+    trap 'rm -f $TMP_MANIFEST_LIST $TMP_SITEMAP $TMP_SITEMAP.gz; find . -mindepth 1 -maxdepth 1 -type f -name "$TMP_SITEMAP_PART_PREFIX.*" -delete; exit' 0 1 2 3 15
     split -x --lines="$MAX_FILE_COUNT" "$TMP_MANIFEST_LIST" "$TMP_SITEMAP_PART_PREFIX."
 
     # output the XML header for the main sitemap
@@ -784,7 +734,7 @@ else
 	status="$?"
 	if [[ $status -ne 0 ]]; then
 	    echo "$0: ERROR: form_sitemap $PART $TMP_SITEMAP_PART $SITEMAP_PART failed, error: $status" 1>&2
-	    exit 39
+	    exit 30
 	fi
 
 	# append to the main sitemap
@@ -806,7 +756,7 @@ else
     #
     if [[ ! -s $TMP_SITEMAP ]]; then
 	echo "$0: ERROR: temporary sitemap is empty: $TMP_SITEMAP" 1>&2
-	exit 40
+	exit 31
     fi
 
     # move the sitemap in place only if different
@@ -828,7 +778,7 @@ else
 	fi
 	if [[ -s $TMP_SITEMAP ]]; then
 	    echo "$0: ERROR: unable remove empty sitemap file: $TMP_SITEMAP" 1>&2
-	    exit 41
+	    exit 32
 	fi
 
     # case: sitemap changed, update the sitemap file unless -n
@@ -849,13 +799,13 @@ else
 	fi
 	if [[ status -ne 0 ]]; then
 	    echo "$0: ERROR: mv -f -- $TMP_SITEMAP $SITEMAP filed, error code: $status" 1>&2
-	    exit 42
+	    exit 33
 	elif [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: replaced sitemap file: $SITEMAP" 1>&2
 	fi
 	if [[ ! -s $SITEMAP ]]; then
 	    echo "$0: ERROR: sitemap file is empty: $SITEMAP" 1>&2
-	    exit 43
+	    exit 34
 	fi
 
 	# form the zipped sitemap file
@@ -864,7 +814,7 @@ else
 	status="$?"
 	if [[ $status -ne 0 ]]; then
 	    echo "$0: ERROR: gzip -f -q --best < $SITEMAP > ${TMP_SITEMAP}.gz failed, error: $status" 1>&2
-	    exit 44
+	    exit 35
 	fi
 	if [[ $V_FLAG -ge 3 ]]; then
 	    mv -f -v -- "${TMP_SITEMAP}.gz" "${SITEMAP}.gz"
@@ -875,7 +825,7 @@ else
 	fi
 	if [[ $status -ne 0 ]]; then
 	    echo "$0: ERROR: mv -f -- ${TMP_SITEMAP}.gz ${SITEMAP}.gz  failed, error: $status" 1>&2
-	    exit 45
+	    exit 36
 	elif [[ $V_FLAG -ge 1 ]]; then
 	    echo "$0: debug[1]: replaced gzipped sitemap file: ${SITEMAP}.gz" 1>&2
 	fi
@@ -893,7 +843,7 @@ else
 	fi
 	if [[ -s $TMP_SITEMAP ]]; then
 	    echo "$0: ERROR: unable remove empty sitemap file: $TMP_SITEMAP" 1>&2
-	    exit 46
+	    exit 37
 	fi
     fi
 
@@ -901,4 +851,5 @@ fi
 
 # All Done!!! -- Jessica Noll, Age 2
 #
+rm -f "$TMP_MANIFEST_LIST" "$TMP_SITEMAP"
 exit 0
