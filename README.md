@@ -61,3 +61,8 @@ Exit codes:
 
 mksitemap version: 1.0 2024-06-16
 ```
+
+
+# Reporting Security Issues
+
+To report a security issue, please visit "[Reporting Security Issues](https://github.com/lcn1/mksitemap/security/policy)".
