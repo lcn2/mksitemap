@@ -44,7 +44,8 @@ CFLAGS= -O3 -g3 --pedantic -Wall
 # target information #
 ######################
 
-DESTDIR= /usr/local/bin
+PREFIX= /usr/local
+DESTDIR= ${PREFIX}/bin
 
 TARGETS= mksitemap
 
