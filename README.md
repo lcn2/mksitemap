@@ -3,13 +3,6 @@
 Build a sitemap file for a directory of files.
 
 
-### Example
-
-```sh
-mksitemap -v 1 /var/www/html http://www.example.com
-```
-
-
 ## Install mksitemap
 
 ```sh
@@ -21,20 +14,27 @@ make install
 Change the `DESTDIR= /usr/local/bin` line in the `Makefile` if needed.
 
 
+### Example
+
+```sh
+$ mksitemap -v 1 /var/www/html http://www.example.com
+```
+
+
 ## Run mksitemap
 
 ```sh
-mksitemap topdir site_url
+$ mksitemap topdir site_url
 ```
 
 Where `topdir` is the top level directory containing your website tree,
 and `site_url` is the URL of your site including the leading _http://_ or _https://_.
 
 
-## Command line help
+## To use
 
 ```
-/mksitemap [-h] [-v level] [-V] [-N] topdir site_url
+/usr/local/bin/mksitemap [-h] [-v level] [-V] [-N] topdir site_url
 
 	-h		print help message and exit
 	-v level	set verbosity level (def level: 0)
